@@ -336,7 +336,7 @@ function App() {
         <Box sx={{ bgcolor: 'grey.900', color: 'white', py: 4 }}>
           <Container maxWidth="lg">
             <Typography variant="body2" align="center">
-              © 2024 Smart Resume Analyzer. Powered by Google Gemini AI.
+              © 2025 Cv Master | All rights reserved.
             </Typography>
           </Container>
         </Box>
