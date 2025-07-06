@@ -48,7 +48,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({
   const [inputMode, setInputMode] = useState<'text' | 'file'>('text');
 
   const handleInputModeChange = (
-    event: React.MouseEvent<HTMLElement>,
+    _event: React.MouseEvent<HTMLElement>,
     newMode: 'text' | 'file' | null,
   ) => {
     if (newMode !== null) {

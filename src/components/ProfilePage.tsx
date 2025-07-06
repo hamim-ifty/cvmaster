@@ -8,7 +8,6 @@ import {
   Avatar,
   Button,
   TextField,
-  Grid,
   Divider,
   Card,
   CardContent,
@@ -16,6 +15,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  ListItemButton,
   Switch,
   Chip,
   LinearProgress,
@@ -101,9 +101,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
           </Typography>
         </Box>
 
-        <Grid container spacing={3}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
           {/* Profile Information */}
-          <Grid item xs={12} md={8}>
+          <Box sx={{ flex: '1 1 600px', minWidth: 0 }}>
             <Paper sx={{ p: 4 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h6">Profile Information</Typography>
@@ -148,8 +148,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                 </Box>
               </Box>
 
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                <Box sx={{ flex: '1 1 250px' }}>
                   <TextField
                     fullWidth
                     label="Job Title"
@@ -160,8 +160,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                       startAdornment: <WorkIcon sx={{ mr: 1, color: 'text.secondary' }} />,
                     }}
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
+                </Box>
+                <Box sx={{ flex: '1 1 250px' }}>
                   <TextField
                     fullWidth
                     label="Company"
@@ -172,8 +172,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                       startAdornment: <SchoolIcon sx={{ mr: 1, color: 'text.secondary' }} />,
                     }}
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
+                </Box>
+                <Box sx={{ flex: '1 1 250px' }}>
                   <TextField
                     fullWidth
                     label="Location"
@@ -184,8 +184,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                       startAdornment: <LocationIcon sx={{ mr: 1, color: 'text.secondary' }} />,
                     }}
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
+                </Box>
+                <Box sx={{ flex: '1 1 250px' }}>
                   <TextField
                     fullWidth
                     label="Phone"
@@ -196,8 +196,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                       startAdornment: <PhoneIcon sx={{ mr: 1, color: 'text.secondary' }} />,
                     }}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </Box>
+                <Box sx={{ flex: '1 1 100%' }}>
                   <TextField
                     fullWidth
                     label="LinkedIn Profile"
@@ -208,8 +208,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                       startAdornment: <LinkedInIcon sx={{ mr: 1, color: 'text.secondary' }} />,
                     }}
                   />
-                </Grid>
-                <Grid item xs={12}>
+                </Box>
+                <Box sx={{ flex: '1 1 100%' }}>
                   <TextField
                     fullWidth
                     multiline
@@ -220,8 +220,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                     disabled={!isEditing}
                     placeholder="Tell us about yourself..."
                   />
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
             </Paper>
 
             {/* Preferences */}
@@ -271,10 +271,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                 </ListItem>
               </List>
             </Paper>
-          </Grid>
+          </Box>
 
           {/* Stats and Activity */}
-          <Grid item xs={12} md={4}>
+          <Box sx={{ flex: '0 1 400px', minWidth: 300 }}>
             {/* Member Level Card */}
             <Card sx={{ mb: 3 }}>
               <CardContent>
@@ -344,7 +344,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                   Account Security
                 </Typography>
                 <List dense>
-                  <ListItem button sx={{ px: 0 }}>
+                  <ListItemButton sx={{ px: 0 }}>
                     <ListItemIcon>
                       <SecurityIcon />
                     </ListItemIcon>
@@ -352,7 +352,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                       primary="Manage Security Settings"
                       secondary="Update password and 2FA"
                     />
-                  </ListItem>
+                  </ListItemButton>
                 </List>
                 <Button
                   fullWidth
@@ -365,8 +365,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ resumeHistory }) => {
                 </Button>
               </CardContent>
             </Card>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );
