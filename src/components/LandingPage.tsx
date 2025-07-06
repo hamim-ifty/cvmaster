@@ -11,7 +11,6 @@ import {
   Stack,
   Paper,
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import {
   Login as LoginIcon,
   AutoAwesome as MagicIcon,
@@ -58,8 +57,8 @@ const LandingPage: React.FC = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+            <Box sx={{ flex: '1 1 500px' }}>
               <Box sx={{ mb: 4 }}>
                 <Chip
                   icon={<MagicIcon />}
@@ -101,9 +100,9 @@ const LandingPage: React.FC = () => {
                   </Button>
                 </SignInButton>
               </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ position: 'relative', display: { xs: 'none', md: 'block' } }}>
+            </Box>
+            <Box sx={{ flex: '1 1 400px', display: { xs: 'none', md: 'block' } }}>
+              <Box sx={{ position: 'relative' }}>
                 <Paper
                   elevation={8}
                   sx={{
@@ -128,8 +127,8 @@ const LandingPage: React.FC = () => {
                   <Typography color="text.secondary">Great match for Senior Developer!</Typography>
                 </Paper>
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Container>
       </Box>
 
@@ -142,56 +141,50 @@ const LandingPage: React.FC = () => {
           Transform your career in 3 simple steps
         </Typography>
 
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', textAlign: 'center', p: 3 }}>
-              <Avatar sx={{ width: 60, height: 60, bgcolor: 'primary.light', mx: 'auto', mb: 3 }}>
-                <ResumeIcon fontSize="large" />
-              </Avatar>
-              <Typography variant="h5" gutterBottom>
-                1. Upload Your Resume
-              </Typography>
-              <Typography color="text.secondary">
-                Simply upload your current resume in any format. Our AI will analyze it instantly.
-              </Typography>
-            </Card>
-          </Grid>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
+          <Card sx={{ flex: '1 1 300px', maxWidth: 400, textAlign: 'center', p: 3 }}>
+            <Avatar sx={{ width: 60, height: 60, bgcolor: 'primary.light', mx: 'auto', mb: 3 }}>
+              <ResumeIcon fontSize="large" />
+            </Avatar>
+            <Typography variant="h5" gutterBottom>
+              1. Upload Your Resume
+            </Typography>
+            <Typography color="text.secondary">
+              Simply upload your current resume in any format. Our AI will analyze it instantly.
+            </Typography>
+          </Card>
 
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', textAlign: 'center', p: 3 }}>
-              <Avatar sx={{ width: 60, height: 60, bgcolor: 'secondary.light', mx: 'auto', mb: 3 }}>
-                <RateIcon fontSize="large" />
-              </Avatar>
-              <Typography variant="h5" gutterBottom>
-                2. Get AI Rating
-              </Typography>
-              <Typography color="text.secondary">
-                Select your target role and receive an instant compatibility score with detailed feedback.
-              </Typography>
-            </Card>
-          </Grid>
+          <Card sx={{ flex: '1 1 300px', maxWidth: 400, textAlign: 'center', p: 3 }}>
+            <Avatar sx={{ width: 60, height: 60, bgcolor: 'secondary.light', mx: 'auto', mb: 3 }}>
+              <RateIcon fontSize="large" />
+            </Avatar>
+            <Typography variant="h5" gutterBottom>
+              2. Get AI Rating
+            </Typography>
+            <Typography color="text.secondary">
+              Select your target role and receive an instant compatibility score with detailed feedback.
+            </Typography>
+          </Card>
 
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', textAlign: 'center', p: 3 }}>
-              <Avatar sx={{ width: 60, height: 60, bgcolor: 'error.light', mx: 'auto', mb: 3 }}>
-                <EditIcon fontSize="large" />
-              </Avatar>
-              <Typography variant="h5" gutterBottom>
-                3. Download Enhanced Resume
-              </Typography>
-              <Typography color="text.secondary">
-                Get a professionally rewritten resume and custom cover letter tailored to your goals.
-              </Typography>
-            </Card>
-          </Grid>
-        </Grid>
+          <Card sx={{ flex: '1 1 300px', maxWidth: 400, textAlign: 'center', p: 3 }}>
+            <Avatar sx={{ width: 60, height: 60, bgcolor: 'error.light', mx: 'auto', mb: 3 }}>
+              <EditIcon fontSize="large" />
+            </Avatar>
+            <Typography variant="h5" gutterBottom>
+              3. Download Enhanced Resume
+            </Typography>
+            <Typography color="text.secondary">
+              Get a professionally rewritten resume and custom cover letter tailored to your goals.
+            </Typography>
+          </Card>
+        </Box>
       </Container>
 
       {/* Features List */}
       <Box sx={{ bgcolor: 'grey.50', py: 10 }}>
         <Container maxWidth="lg">
-          <Grid container spacing={6} alignItems="center">
-            <Grid item xs={12} md={6}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+            <Box sx={{ flex: '1 1 500px' }}>
               <Typography variant="h3" gutterBottom>
                 Powered by Google Gemini AI
               </Typography>
@@ -214,9 +207,9 @@ const LandingPage: React.FC = () => {
                   </Box>
                 ))}
               </Stack>
-            </Grid>
+            </Box>
 
-            <Grid item xs={12} md={6}>
+            <Box sx={{ flex: '1 1 400px' }}>
               <Box sx={{ position: 'relative' }}>
                 <Paper
                   elevation={3}
@@ -239,8 +232,8 @@ const LandingPage: React.FC = () => {
                   </SignInButton>
                 </Paper>
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Container>
       </Box>
 
@@ -248,7 +241,7 @@ const LandingPage: React.FC = () => {
       <Box sx={{ bgcolor: 'grey.900', color: 'white', py: 4 }}>
         <Container maxWidth="lg">
           <Typography variant="body2" align="center">
-            © 2025 Smart Resume Analyzer | All rights reserved.
+            © 2024 Smart Resume Analyzer. Powered by Google Gemini AI.
           </Typography>
         </Container>
       </Box>
