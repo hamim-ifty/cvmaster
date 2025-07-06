@@ -12,11 +12,17 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Chip,
+  Divider,
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Mail as MailIcon,
   Description as ResumeIcon,
+  CheckCircle as CheckIcon,
+  Warning as WarningIcon,
+  TipsAndUpdates as TipIcon,
+  Download as DownloadIcon,
 } from '@mui/icons-material';
 
 interface ResumeAnalysisProps {
@@ -31,6 +37,9 @@ interface ResumeAnalysisProps {
     inputType?: 'text' | 'file';
   }>;
   onReset: () => void;
+  analysisResult?: any;
+  onDownloadResume?: () => void;
+  onDownloadCoverLetter?: () => void;
 }
 
 const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
@@ -38,8 +47,17 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
   selectedRole,
   resumeHistory,
   onReset,
+  analysisResult,
+  onDownloadResume,
+  onDownloadCoverLetter,
 }) => {
   if (resumeScore === null) return null;
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'success';
+    if (score >= 60) return 'warning';
+    return 'error';
+  };
 
   return (
     <Box>
@@ -65,16 +83,117 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
               ? 'Good match with room for improvement'
               : 'Consider enhancing your resume for better alignment'}
           </Typography>
+          
+          {analysisResult?.analysis?.atsScore && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                ATS Score: {analysisResult.analysis.atsScore}/100
+              </Typography>
+            </Box>
+          )}
         </CardContent>
         <CardActions>
-          <Button startIcon={<EditIcon />} variant="contained">
-            Get Rewritten Resume
+          <Button 
+            startIcon={<DownloadIcon />} 
+            variant="contained"
+            onClick={onDownloadResume}
+          >
+            Download Enhanced Resume
           </Button>
-          <Button startIcon={<MailIcon />} variant="outlined">
-            Generate Cover Letter
+          <Button 
+            startIcon={<MailIcon />} 
+            variant="outlined"
+            onClick={onDownloadCoverLetter}
+          >
+            Download Cover Letter
           </Button>
         </CardActions>
       </Card>
+
+      {/* Analysis Details */}
+      {analysisResult?.analysis && (
+        <>
+          {/* Strengths */}
+          {analysisResult.analysis.strengths?.length > 0 && (
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                <CheckIcon color="success" sx={{ mr: 1 }} />
+                Strengths
+              </Typography>
+              <List dense>
+                {analysisResult.analysis.strengths.map((strength: string, index: number) => (
+                  <ListItem key={index}>
+                    <ListItemIcon>
+                      <CheckIcon color="success" fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary={strength} />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          )}
+
+          {/* Areas for Improvement */}
+          {analysisResult.analysis.improvements?.length > 0 && (
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                <WarningIcon color="warning" sx={{ mr: 1 }} />
+                Areas for Improvement
+              </Typography>
+              <List dense>
+                {analysisResult.analysis.improvements.map((improvement: string, index: number) => (
+                  <ListItem key={index}>
+                    <ListItemIcon>
+                      <WarningIcon color="warning" fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary={improvement} />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          )}
+
+          {/* Keywords */}
+          {analysisResult.analysis.keywords?.length > 0 && (
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Relevant Keywords
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {analysisResult.analysis.keywords.map((keyword: string, index: number) => (
+                  <Chip
+                    key={index}
+                    label={keyword}
+                    color="primary"
+                    variant="outlined"
+                    size="small"
+                  />
+                ))}
+              </Box>
+            </Paper>
+          )}
+
+          {/* Suggestions */}
+          {analysisResult.analysis.suggestions?.length > 0 && (
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                <TipIcon color="info" sx={{ mr: 1 }} />
+                Actionable Suggestions
+              </Typography>
+              <List dense>
+                {analysisResult.analysis.suggestions.map((suggestion: string, index: number) => (
+                  <ListItem key={index}>
+                    <ListItemIcon>
+                      <TipIcon color="info" fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary={suggestion} />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          )}
+        </>
+      )}
 
       {/* Action Buttons */}
       <Button variant="outlined" onClick={onReset} fullWidth>
@@ -95,7 +214,18 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
                 </ListItemIcon>
                 <ListItemText
                   primary={item.role}
-                  secondary={`Score: ${item.score}/100 • ${item.fileName}${item.inputType === 'text' ? ' (Text)' : ''}`}
+                  secondary={
+                    <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip 
+                        label={`${item.score}/100`} 
+                        size="small" 
+                        color={getScoreColor(item.score) as any}
+                      />
+                      <Typography variant="caption" component="span">
+                        {item.fileName}{item.inputType === 'text' ? ' (Text)' : ''}
+                      </Typography>
+                    </Box>
+                  }
                 />
               </ListItem>
             ))}

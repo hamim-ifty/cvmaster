@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import {
   Box,
@@ -8,6 +8,8 @@ import {
   List,
   ListItem,
   ListItemText,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import { GridContainer, GridItem } from './GridReplacement';
 import Header from './Header';
@@ -16,6 +18,7 @@ import ResumeUpload from './ResumeUpload';
 import ResumeAnalysis from './ResumeAnalysis';
 import HistoryPage from './HistoryPage';
 import ProfilePage from './ProfilePage';
+import { apiService, AnalysisHistory } from '../services/api';
 
 const drawerWidth = 240;
 
@@ -46,6 +49,7 @@ const Dashboard: React.FC = () => {
   const [resumeText, setResumeText] = useState('');
   const [resumeScore, setResumeScore] = useState<number | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [resumeHistory, setResumeHistory] = useState<Array<{
     id: string;
     fileName: string;
@@ -54,6 +58,34 @@ const Dashboard: React.FC = () => {
     date: Date;
     inputType: 'text' | 'file';
   }>>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Fetch analysis history on component mount
+  useEffect(() => {
+    if (user?.id) {
+      fetchAnalysisHistory();
+    }
+  }, [user?.id]);
+
+  const fetchAnalysisHistory = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const history = await apiService.getAnalysisHistory(user.id);
+      const formattedHistory = history.map(item => ({
+        id: item._id,
+        fileName: item.fileName,
+        role: item.targetRole,
+        score: item.score,
+        date: new Date(item.createdAt),
+        inputType: item.fileType,
+      }));
+      setResumeHistory(formattedHistory);
+    } catch (error) {
+      console.error('Failed to fetch analysis history:', error);
+    }
+  };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -65,6 +97,7 @@ const Dashboard: React.FC = () => {
       setUploadedFile(file);
       setResumeText(''); // Clear text when file is uploaded
       setResumeScore(null);
+      setAnalysisResult(null);
     }
   };
 
@@ -72,29 +105,36 @@ const Dashboard: React.FC = () => {
     setResumeText(text);
     setUploadedFile(null); // Clear file when text is entered
     setResumeScore(null);
+    setAnalysisResult(null);
   };
 
-  const handleAnalyze = () => {
-    if (!selectedRole || (!uploadedFile && !resumeText.trim())) return;
+  const handleAnalyze = async () => {
+    if (!selectedRole || (!uploadedFile && !resumeText.trim()) || !user?.id) return;
     
     setIsAnalyzing(true);
-    // Simulate API call
-    setTimeout(() => {
-      const mockScore = Math.floor(Math.random() * 30) + 70; // Random score between 70-100
-      setResumeScore(mockScore);
-      setIsAnalyzing(false);
+    setError(null);
+    
+    try {
+      let result;
       
-      // Add to history
-      const newEntry = {
-        id: Date.now().toString(),
-        fileName: uploadedFile ? uploadedFile.name : 'Pasted Resume',
-        role: selectedRole,
-        score: mockScore,
-        date: new Date(),
-        inputType: uploadedFile ? 'file' as const : 'text' as const,
-      };
-      setResumeHistory([newEntry, ...resumeHistory]);
-    }, 2000); // Reduced time for text analysis
+      if (uploadedFile) {
+        result = await apiService.analyzeResumeFile(uploadedFile, selectedRole, user.id);
+      } else {
+        result = await apiService.analyzeResumeText(resumeText, selectedRole, user.id);
+      }
+      
+      setResumeScore(result.score);
+      setAnalysisResult(result);
+      setSuccessMessage('Resume analyzed successfully!');
+      
+      // Refresh history
+      await fetchAnalysisHistory();
+    } catch (error) {
+      console.error('Analysis error:', error);
+      setError('Failed to analyze resume. Please try again.');
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleReset = () => {
@@ -102,10 +142,42 @@ const Dashboard: React.FC = () => {
     setUploadedFile(null);
     setResumeText('');
     setResumeScore(null);
+    setAnalysisResult(null);
   };
 
-  const handleDeleteHistoryItem = (id: string) => {
-    setResumeHistory(resumeHistory.filter(item => item.id !== id));
+  const handleDeleteHistoryItem = async (id: string) => {
+    try {
+      await apiService.deleteAnalysis(id);
+      setSuccessMessage('Analysis deleted successfully');
+      await fetchAnalysisHistory();
+    } catch (error) {
+      console.error('Delete error:', error);
+      setError('Failed to delete analysis');
+    }
+  };
+
+  const handleDownloadResume = async () => {
+    if (!analysisResult?.analysisId) return;
+    
+    try {
+      await apiService.downloadResume(analysisResult.analysisId);
+      setSuccessMessage('Resume downloaded successfully!');
+    } catch (error) {
+      console.error('Download error:', error);
+      setError('Failed to download resume');
+    }
+  };
+
+  const handleDownloadCoverLetter = async () => {
+    if (!analysisResult?.analysisId) return;
+    
+    try {
+      await apiService.downloadCoverLetter(analysisResult.analysisId);
+      setSuccessMessage('Cover letter downloaded successfully!');
+    } catch (error) {
+      console.error('Download error:', error);
+      setError('Failed to download cover letter');
+    }
   };
 
   const renderContent = () => {
@@ -158,6 +230,9 @@ const Dashboard: React.FC = () => {
                       selectedRole={selectedRole}
                       resumeHistory={resumeHistory}
                       onReset={handleReset}
+                      analysisResult={analysisResult}
+                      onDownloadResume={handleDownloadResume}
+                      onDownloadCoverLetter={handleDownloadCoverLetter}
                     />
                   )}
                 </Paper>
@@ -231,6 +306,30 @@ const Dashboard: React.FC = () => {
       >
         {renderContent()}
       </Box>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={6000}
+        onClose={() => setSuccessMessage(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setSuccessMessage(null)} severity="success" sx={{ width: '100%' }}>
+          {successMessage}
+        </Alert>
+      </Snackbar>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

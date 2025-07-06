@@ -22,6 +22,8 @@ import {
   InputAdornment,
   TablePagination,
   Tooltip,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -33,6 +35,7 @@ import {
   TextFields as TextIcon,
   AttachFile as FileIcon,
 } from '@mui/icons-material';
+import { apiService } from '../services/api';
 
 interface HistoryItem {
   id: string;
@@ -55,6 +58,8 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ resumeHistory, onDeleteItem }
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Filter history based on search term
   const filteredHistory = resumeHistory.filter(
@@ -75,6 +80,16 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ resumeHistory, onDeleteItem }
   const handleViewDetails = (item: HistoryItem) => {
     setSelectedItem(item);
     setViewDialogOpen(true);
+  };
+
+  const handleDownloadReport = async (analysisId: string) => {
+    try {
+      await apiService.downloadReport(analysisId);
+      setSuccessMessage('Report downloaded successfully!');
+    } catch (error) {
+      console.error('Download error:', error);
+      setError('Failed to download report. Please try again.');
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -198,7 +213,10 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ resumeHistory, onDeleteItem }
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Download Report">
-                            <IconButton size="small">
+                            <IconButton 
+                              size="small"
+                              onClick={() => handleDownloadReport(item.id)}
+                            >
                               <DownloadIcon />
                             </IconButton>
                           </Tooltip>
@@ -311,13 +329,44 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ resumeHistory, onDeleteItem }
               </DialogContent>
               <DialogActions>
                 <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
-                <Button variant="contained" startIcon={<DownloadIcon />}>
+                <Button 
+                  variant="contained" 
+                  startIcon={<DownloadIcon />}
+                  onClick={() => {
+                    handleDownloadReport(selectedItem.id);
+                    setViewDialogOpen(false);
+                  }}
+                >
                   Download Report
                 </Button>
               </DialogActions>
             </>
           )}
         </Dialog>
+
+        {/* Success Snackbar */}
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={6000}
+          onClose={() => setSuccessMessage(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={() => setSuccessMessage(null)} severity="success" sx={{ width: '100%' }}>
+            {successMessage}
+          </Alert>
+        </Snackbar>
+
+        {/* Error Snackbar */}
+        <Snackbar
+          open={!!error}
+          autoHideDuration={6000}
+          onClose={() => setError(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );
