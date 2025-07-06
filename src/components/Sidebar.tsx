@@ -3,7 +3,7 @@ import {
   Box,
   Drawer,
   List,
-  ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Toolbar,
@@ -14,9 +14,9 @@ import {
 import {
   Home as HomeIcon,
   History as HistoryIcon,
-  Settings as SettingsIcon,
   Logout as LogoutIcon,
   AutoAwesome as MagicIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material';
 import { useClerk } from '@clerk/clerk-react';
 
@@ -24,15 +24,17 @@ interface SidebarProps {
   mobileOpen: boolean;
   onDrawerToggle: () => void;
   drawerWidth: number;
+  currentPage: 'dashboard' | 'history' | 'profile';
+  onPageChange: (page: 'dashboard' | 'history' | 'profile') => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onDrawerToggle, drawerWidth }) => {
+const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onDrawerToggle, drawerWidth, currentPage, onPageChange }) => {
   const { signOut } = useClerk();
 
   const menuItems = [
-    { text: 'Dashboard', icon: <HomeIcon />, active: true },
-    { text: 'History', icon: <HistoryIcon /> },
-    { text: 'Settings', icon: <SettingsIcon /> },
+    { text: 'Dashboard', icon: <HomeIcon />, page: 'dashboard' as const },
+    { text: 'History', icon: <HistoryIcon />, page: 'history' as const },
+    { text: 'Profile', icon: <PersonIcon />, page: 'profile' as const },
   ];
 
   const drawer = (
@@ -50,31 +52,31 @@ const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onDrawerToggle, drawerWid
       <Divider />
       <List>
         {menuItems.map((item) => (
-          <ListItem
-            button
+          <ListItemButton
             key={item.text}
+            onClick={() => onPageChange(item.page)}
             sx={{
-              bgcolor: item.active ? 'action.selected' : 'transparent',
+              bgcolor: currentPage === item.page ? 'action.selected' : 'transparent',
               '&:hover': {
                 bgcolor: 'action.hover',
               },
             }}
           >
-            <ListItemIcon sx={{ color: item.active ? 'primary.main' : 'inherit' }}>
+            <ListItemIcon sx={{ color: currentPage === item.page ? 'primary.main' : 'inherit' }}>
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.text} />
-          </ListItem>
+          </ListItemButton>
         ))}
       </List>
       <Divider />
       <List>
-        <ListItem button onClick={() => signOut()}>
+        <ListItemButton onClick={() => signOut()}>
           <ListItemIcon>
             <LogoutIcon />
           </ListItemIcon>
           <ListItemText primary="Sign Out" />
-        </ListItem>
+        </ListItemButton>
       </List>
     </Box>
   );

@@ -10,9 +10,21 @@ import { Menu as MenuIcon } from '@mui/icons-material';
 interface HeaderProps {
   onMenuToggle: () => void;
   drawerWidth: number;
+  currentPage?: 'dashboard' | 'history' | 'profile';
 }
 
-const Header: React.FC<HeaderProps> = ({ onMenuToggle, drawerWidth }) => {
+const Header: React.FC<HeaderProps> = ({ onMenuToggle, drawerWidth, currentPage = 'dashboard' }) => {
+  const getPageTitle = () => {
+    switch (currentPage) {
+      case 'history':
+        return 'Analysis History';
+      case 'profile':
+        return 'My Profile';
+      default:
+        return 'Smart Resume Analyzer';
+    }
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -34,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, drawerWidth }) => {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-          Smart Resume Analyzer
+          {getPageTitle()}
         </Typography>
       </Toolbar>
     </AppBar>

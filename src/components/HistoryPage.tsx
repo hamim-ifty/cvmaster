@@ -63,7 +63,7 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ resumeHistory, onDeleteItem }
       item.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 

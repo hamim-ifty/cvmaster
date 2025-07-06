@@ -9,11 +9,13 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import { GridContainer, GridItem } from './GridReplacement';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import ResumeUpload from './ResumeUpload';
 import ResumeAnalysis from './ResumeAnalysis';
+import HistoryPage from './HistoryPage';
+import ProfilePage from './ProfilePage';
 
 const drawerWidth = 240;
 
@@ -38,6 +40,7 @@ const jobRoles = [
 const Dashboard: React.FC = () => {
   const { user } = useUser();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'history' | 'profile'>('dashboard');
   const [selectedRole, setSelectedRole] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [resumeText, setResumeText] = useState('');
@@ -101,13 +104,119 @@ const Dashboard: React.FC = () => {
     setResumeScore(null);
   };
 
+  const handleDeleteHistoryItem = (id: string) => {
+    setResumeHistory(resumeHistory.filter(item => item.id !== id));
+  };
+
+  const renderContent = () => {
+    switch (currentPage) {
+      case 'history':
+        return (
+          <HistoryPage 
+            resumeHistory={resumeHistory} 
+            onDeleteItem={handleDeleteHistoryItem}
+          />
+        );
+      case 'profile':
+        return <ProfilePage resumeHistory={resumeHistory} />;
+      default:
+        return (
+          <Container maxWidth="lg">
+            {/* Welcome Section */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
+                Welcome back, {user?.firstName || 'User'}! 👋
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Upload your resume and get AI-powered insights to improve your career prospects.
+              </Typography>
+            </Box>
+
+            {/* Main Analysis Section */}
+            <GridContainer spacing={3}>
+              <GridItem xs={12} md={8}>
+                <Paper sx={{ p: 4 }}>
+                  <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
+                    Resume Analysis
+                  </Typography>
+
+                  {!resumeScore ? (
+                    <ResumeUpload
+                      uploadedFile={uploadedFile}
+                      selectedRole={selectedRole}
+                      isAnalyzing={isAnalyzing}
+                      onFileUpload={handleFileUpload}
+                      onRoleChange={setSelectedRole}
+                      onAnalyze={handleAnalyze}
+                      jobRoles={jobRoles}
+                      resumeText={resumeText}
+                      onTextChange={handleTextChange}
+                    />
+                  ) : (
+                    <ResumeAnalysis
+                      resumeScore={resumeScore}
+                      selectedRole={selectedRole}
+                      resumeHistory={resumeHistory}
+                      onReset={handleReset}
+                    />
+                  )}
+                </Paper>
+              </GridItem>
+
+              {/* Sidebar */}
+              <GridItem xs={12} md={4}>
+                {/* Quick Tips */}
+                <Paper sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Quick Tips
+                  </Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Use PDF format"
+                        secondary="For best results, upload your resume in PDF format"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Include keywords"
+                        secondary="Make sure your resume contains relevant industry keywords"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Keep it concise"
+                        secondary="Aim for 1-2 pages for most roles"
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText 
+                        primary="Update regularly"
+                        secondary="Keep your resume current with latest achievements"
+                      />
+                    </ListItem>
+                  </List>
+                </Paper>
+              </GridItem>
+            </GridContainer>
+          </Container>
+        );
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
-      <Header onMenuToggle={handleDrawerToggle} drawerWidth={drawerWidth} />
+      <Header 
+        onMenuToggle={handleDrawerToggle} 
+        drawerWidth={drawerWidth}
+        currentPage={currentPage}
+      />
       <Sidebar 
         mobileOpen={mobileOpen} 
         onDrawerToggle={handleDrawerToggle} 
-        drawerWidth={drawerWidth} 
+        drawerWidth={drawerWidth}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
       />
 
       {/* Main Content */}
@@ -120,85 +229,7 @@ const Dashboard: React.FC = () => {
           mt: 8,
         }}
       >
-        <Container maxWidth="lg">
-          {/* Welcome Section */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-              Welcome back, {user?.firstName || 'User'}! 👋
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Upload your resume and get AI-powered insights to improve your career prospects.
-            </Typography>
-          </Box>
-
-          {/* Main Analysis Section */}
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={8}>
-              <Paper sx={{ p: 4 }}>
-                <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-                  Resume Analysis
-                </Typography>
-
-                {!resumeScore ? (
-                  <ResumeUpload
-                    uploadedFile={uploadedFile}
-                    selectedRole={selectedRole}
-                    isAnalyzing={isAnalyzing}
-                    onFileUpload={handleFileUpload}
-                    onRoleChange={setSelectedRole}
-                    onAnalyze={handleAnalyze}
-                    jobRoles={jobRoles}
-                    resumeText={resumeText}
-                    onTextChange={handleTextChange}
-                  />
-                ) : (
-                  <ResumeAnalysis
-                    resumeScore={resumeScore}
-                    selectedRole={selectedRole}
-                    resumeHistory={resumeHistory}
-                    onReset={handleReset}
-                  />
-                )}
-              </Paper>
-            </Grid>
-
-            {/* Sidebar */}
-            <Grid item xs={12} md={4}>
-              {/* Quick Tips */}
-              <Paper sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  Quick Tips
-                </Typography>
-                <List dense>
-                  <ListItem>
-                    <ListItemText 
-                      primary="Use PDF format"
-                      secondary="For best results, upload your resume in PDF format"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText 
-                      primary="Include keywords"
-                      secondary="Make sure your resume contains relevant industry keywords"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText 
-                      primary="Keep it concise"
-                      secondary="Aim for 1-2 pages for most roles"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText 
-                      primary="Update regularly"
-                      secondary="Keep your resume current with latest achievements"
-                    />
-                  </ListItem>
-                </List>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
+        {renderContent()}
       </Box>
     </Box>
   );
