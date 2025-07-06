@@ -28,6 +28,7 @@ interface ResumeAnalysisProps {
     role: string;
     score: number;
     date: Date;
+    inputType?: 'text' | 'file';
   }>;
   onReset: () => void;
 }
@@ -94,7 +95,7 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
                 </ListItemIcon>
                 <ListItemText
                   primary={item.role}
-                  secondary={`Score: ${item.score}/100 • ${item.fileName}`}
+                  secondary={`Score: ${item.score}/100 • ${item.fileName}${item.inputType === 'text' ? ' (Text)' : ''}`}
                 />
               </ListItem>
             ))}
