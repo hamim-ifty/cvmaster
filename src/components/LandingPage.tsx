@@ -5,13 +5,13 @@ import {
   Container,
   Typography,
   Button,
-  Grid,
   Card,
   Avatar,
   Chip,
   Stack,
   Paper,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import {
   Login as LoginIcon,
   AutoAwesome as MagicIcon,
