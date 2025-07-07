@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Card,
@@ -13,16 +13,18 @@ import {
   ListItemIcon,
   ListItemText,
   Chip,
-  Divider,
+  Alert,
+  CircularProgress,
+  LinearProgress,
 } from '@mui/material';
 import {
-  Edit as EditIcon,
   Mail as MailIcon,
   Description as ResumeIcon,
   CheckCircle as CheckIcon,
   Warning as WarningIcon,
   TipsAndUpdates as TipIcon,
   Download as DownloadIcon,
+  Error as ErrorIcon,
 } from '@mui/icons-material';
 
 interface ResumeAnalysisProps {
@@ -38,8 +40,8 @@ interface ResumeAnalysisProps {
   }>;
   onReset: () => void;
   analysisResult?: any;
-  onDownloadResume?: () => void;
-  onDownloadCoverLetter?: () => void;
+  analysisId?: string;
+  error?: string | null;
 }
 
 const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
@@ -48,9 +50,47 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
   resumeHistory,
   onReset,
   analysisResult,
-  onDownloadResume,
-  onDownloadCoverLetter,
+  analysisId,
+  error,
 }) => {
+  const [downloadingResume, setDownloadingResume] = useState(false);
+  const [downloadingCover, setDownloadingCover] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  // Show error state
+  if (error) {
+    return (
+      <Box>
+        <Alert 
+          severity="error" 
+          icon={<ErrorIcon />}
+          action={
+            <Button color="inherit" size="small" onClick={onReset}>
+              Try Again
+            </Button>
+          }
+        >
+          <Typography variant="h6" gutterBottom>Analysis Failed</Typography>
+          <Typography variant="body2">{error}</Typography>
+        </Alert>
+      </Box>
+    );
+  }
+
+  // Show loading state
+  if (resumeScore === null && !error) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <CircularProgress size={60} sx={{ mb: 2 }} />
+        <Typography variant="h6" gutterBottom>Analyzing your resume...</Typography>
+        <Typography variant="body2" color="text.secondary">
+          This may take a few moments
+        </Typography>
+        <LinearProgress sx={{ mt: 2, maxWidth: 300, mx: 'auto' }} />
+      </Box>
+    );
+  }
+
   if (resumeScore === null) return null;
 
   const getScoreColor = (score: number) => {
@@ -59,8 +99,86 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
     return 'error';
   };
 
+  // Download functions with proper error handling
+  const handleDownloadResume = async () => {
+    if (!analysisId) {
+      setDownloadError('No analysis ID available for download');
+      return;
+    }
+
+    setDownloadingResume(true);
+    setDownloadError(null);
+
+    try {
+      const response = await fetch(`https://atc-v4nf.onrender.com/api/download/resume/${analysisId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Download failed' }));
+        throw new Error(errorData.error || 'Failed to download resume');
+      }
+
+      // Create download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `resume-${selectedRole.replace(/\s+/g, '-')}-enhanced.txt`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download resume error:', error);
+      setDownloadError(error instanceof Error ? error.message : 'Failed to download resume');
+    } finally {
+      setDownloadingResume(false);
+    }
+  };
+
+  const handleDownloadCoverLetter = async () => {
+    if (!analysisId) {
+      setDownloadError('No analysis ID available for download');
+      return;
+    }
+
+    setDownloadingCover(true);
+    setDownloadError(null);
+
+    try {
+      const response = await fetch(`https://atc-v4nf.onrender.com/api/download/coverletter/${analysisId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Download failed' }));
+        throw new Error(errorData.error || 'Failed to download cover letter');
+      }
+
+      // Create download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cover-letter-${selectedRole.replace(/\s+/g, '-')}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download cover letter error:', error);
+      setDownloadError(error instanceof Error ? error.message : 'Failed to download cover letter');
+    } finally {
+      setDownloadingCover(false);
+    }
+  };
+
   return (
     <Box>
+      {/* Download Error */}
+      {downloadError && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setDownloadError(null)}>
+          {downloadError}
+        </Alert>
+      )}
+
       {/* Score Card */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
@@ -94,18 +212,20 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
         </CardContent>
         <CardActions>
           <Button 
-            startIcon={<DownloadIcon />} 
+            startIcon={downloadingResume ? <CircularProgress size={16} /> : <DownloadIcon />} 
             variant="contained"
-            onClick={onDownloadResume}
+            onClick={handleDownloadResume}
+            disabled={downloadingResume || !analysisId}
           >
-            Download Enhanced Resume
+            {downloadingResume ? 'Downloading...' : 'Download Enhanced Resume'}
           </Button>
           <Button 
-            startIcon={<MailIcon />} 
+            startIcon={downloadingCover ? <CircularProgress size={16} /> : <MailIcon />} 
             variant="outlined"
-            onClick={onDownloadCoverLetter}
+            onClick={handleDownloadCoverLetter}
+            disabled={downloadingCover || !analysisId}
           >
-            Download Cover Letter
+            {downloadingCover ? 'Downloading...' : 'Download Cover Letter'}
           </Button>
         </CardActions>
       </Card>
