@@ -109,7 +109,7 @@ class ApiService {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `resume-enhanced-${new Date().getTime()}.md`;
+      a.download = `resume-enhanced-${new Date().getTime()}.txt`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -133,7 +133,7 @@ class ApiService {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `cover-letter-${new Date().getTime()}.md`;
+      a.download = `cover-letter-${new Date().getTime()}.txt`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -157,7 +157,7 @@ class ApiService {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `analysis-report-${new Date().getTime()}.md`;
+      a.download = `analysis-report-${new Date().getTime()}.txt`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
