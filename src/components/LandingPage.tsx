@@ -1,5 +1,5 @@
 import React from 'react';
-import { SignInButton } from '@clerk/clerk-react';
+import { SignInButton, useAuth } from '@clerk/clerk-react';
 import {
   Box,
   Container,
@@ -20,6 +20,13 @@ import {
 
 const LandingPage: React.FC = () => {
   const theme = useTheme();
+  const { isSignedIn } = useAuth();
+
+  // Custom sign-in handler
+  const handleSignIn = () => {
+    // This will trigger the sign-in modal
+    document.querySelector('[data-clerk-sign-in-button]')?.click();
+  };
 
   const features = [
     {
@@ -48,11 +55,18 @@ const LandingPage: React.FC = () => {
             <Typography variant="h5" fontWeight={700} color="primary.main">
               Smart Resume Analyzer
             </Typography>
+            {/* Hidden SignInButton for functionality */}
             <SignInButton mode="modal">
-              <Button variant="contained" color="primary">
-                Sign In
-              </Button>
+              <button data-clerk-sign-in-button style={{ display: 'none' }}>Hidden</button>
             </SignInButton>
+            
+            <Button 
+              variant="contained" 
+              color="primary"
+              onClick={handleSignIn}
+            >
+              Sign In
+            </Button>
           </Box>
         </Container>
       </Box>
@@ -84,20 +98,19 @@ const LandingPage: React.FC = () => {
             rewriting to land your dream job.
           </Typography>
           
-          <SignInButton mode="modal">
-            <Button
-              variant="contained"
-              size="large"
-              sx={{
-                px: 4,
-                py: 1.5,
-                fontSize: '1.1rem',
-                fontWeight: 600,
-              }}
-            >
-              Start Free Analysis
-            </Button>
-          </SignInButton>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={handleSignIn}
+            sx={{
+              px: 4,
+              py: 1.5,
+              fontSize: '1.1rem',
+              fontWeight: 600,
+            }}
+          >
+            Start Free Analysis
+          </Button>
         </Box>
 
         {/* Stats */}
@@ -265,25 +278,24 @@ const LandingPage: React.FC = () => {
             <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
               Join thousands of professionals who've improved their resumes with AI.
             </Typography>
-            <SignInButton mode="modal">
-              <Button
-                variant="contained"
-                size="large"
-                sx={{
-                  bgcolor: 'white',
-                  color: 'primary.main',
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  '&:hover': {
-                    bgcolor: 'grey.100',
-                  },
-                }}
-              >
-                Start Free Analysis
-              </Button>
-            </SignInButton>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleSignIn}
+              sx={{
+                bgcolor: 'white',
+                color: 'primary.main',
+                px: 4,
+                py: 1.5,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                '&:hover': {
+                  bgcolor: 'grey.100',
+                },
+              }}
+            >
+              Start Free Analysis
+            </Button>
             <Typography variant="body2" sx={{ mt: 2, opacity: 0.8 }}>
               No credit card required • Free forever
             </Typography>
