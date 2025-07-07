@@ -101,8 +101,13 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
 
   // Download functions with proper error handling
   const handleDownloadResume = async () => {
-    if (!analysisId) {
-      setDownloadError('No analysis ID available for download');
+    console.log('Download Resume - analysisId:', analysisId);
+    console.log('Download Resume - analysisResult:', analysisResult);
+    
+    const downloadId = analysisId || analysisResult?.analysisId || analysisResult?.id;
+    
+    if (!downloadId) {
+      setDownloadError('No analysis ID available for download. Please analyze the resume again.');
       return;
     }
 
@@ -110,15 +115,25 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
     setDownloadError(null);
 
     try {
-      const response = await fetch(`https://atc-v4nf.onrender.com/api/download/resume/${analysisId}`);
+      console.log('Downloading resume with ID:', downloadId);
+      const response = await fetch(`https://atc-v4nf.onrender.com/api/download/resume/${downloadId}`);
+      
+      console.log('Download response status:', response.status);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Download failed' }));
-        throw new Error(errorData.error || 'Failed to download resume');
+        console.error('Download error:', errorData);
+        throw new Error(errorData.error || errorData.details || 'Failed to download resume');
       }
 
       // Create download
       const blob = await response.blob();
+      console.log('Blob size:', blob.size);
+      
+      if (blob.size === 0) {
+        throw new Error('Downloaded file is empty');
+      }
+      
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -127,6 +142,8 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      
+      console.log('Resume download completed successfully');
     } catch (error) {
       console.error('Download resume error:', error);
       setDownloadError(error instanceof Error ? error.message : 'Failed to download resume');
@@ -136,8 +153,13 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
   };
 
   const handleDownloadCoverLetter = async () => {
-    if (!analysisId) {
-      setDownloadError('No analysis ID available for download');
+    console.log('Download Cover Letter - analysisId:', analysisId);
+    console.log('Download Cover Letter - analysisResult:', analysisResult);
+    
+    const downloadId = analysisId || analysisResult?.analysisId || analysisResult?.id;
+
+    if (!downloadId) {
+      setDownloadError('No analysis ID available for download. Please analyze the resume again.');
       return;
     }
 
@@ -145,15 +167,25 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
     setDownloadError(null);
 
     try {
-      const response = await fetch(`https://atc-v4nf.onrender.com/api/download/coverletter/${analysisId}`);
+      console.log('Downloading cover letter with ID:', downloadId);
+      const response = await fetch(`https://atc-v4nf.onrender.com/api/download/coverletter/${downloadId}`);
+      
+      console.log('Download response status:', response.status);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Download failed' }));
-        throw new Error(errorData.error || 'Failed to download cover letter');
+        console.error('Download error:', errorData);
+        throw new Error(errorData.error || errorData.details || 'Failed to download cover letter');
       }
 
       // Create download
       const blob = await response.blob();
+      console.log('Blob size:', blob.size);
+      
+      if (blob.size === 0) {
+        throw new Error('Downloaded file is empty');
+      }
+      
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -162,6 +194,8 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      
+      console.log('Cover letter download completed successfully');
     } catch (error) {
       console.error('Download cover letter error:', error);
       setDownloadError(error instanceof Error ? error.message : 'Failed to download cover letter');
@@ -176,6 +210,16 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
       {downloadError && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setDownloadError(null)}>
           {downloadError}
+        </Alert>
+      )}
+
+      {/* Debug Info - Remove this in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Typography variant="caption">
+            Debug: analysisId = {analysisId || 'undefined'}, 
+            analysisResult.analysisId = {analysisResult?.analysisId || 'undefined'}
+          </Typography>
         </Alert>
       )}
 
@@ -215,7 +259,7 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
             startIcon={downloadingResume ? <CircularProgress size={16} /> : <DownloadIcon />} 
             variant="contained"
             onClick={handleDownloadResume}
-            disabled={downloadingResume || !analysisId}
+            disabled={downloadingResume}
           >
             {downloadingResume ? 'Downloading...' : 'Download Enhanced Resume'}
           </Button>
@@ -223,7 +267,7 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
             startIcon={downloadingCover ? <CircularProgress size={16} /> : <MailIcon />} 
             variant="outlined"
             onClick={handleDownloadCoverLetter}
-            disabled={downloadingCover || !analysisId}
+            disabled={downloadingCover}
           >
             {downloadingCover ? 'Downloading...' : 'Download Cover Letter'}
           </Button>
@@ -335,7 +379,7 @@ const ResumeAnalysis: React.FC<ResumeAnalysisProps> = ({
                 <ListItemText
                   primary={item.role}
                   secondary={
-                    <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box component="div" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Chip 
                         label={`${item.score}/100`} 
                         size="small" 
