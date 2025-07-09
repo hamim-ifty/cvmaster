@@ -64,7 +64,7 @@ const SimpleCommentSection = () => {
   const loadComments = async () => {
     setIsLoadingComments(true);
     try {
-      const response = await fetch('http://localhost:5000/api/comments?limit=20');
+      const response = await fetch('https://atc-v4nf.onrender.com/api/comments?limit=20');
       if (response.ok) {
         const data = await response.json();
         setComments(data.comments || []);
@@ -106,7 +106,7 @@ const SimpleCommentSection = () => {
     }
     
     try {
-      const response = await fetch('http://localhost:5000/api/comments', {
+      const response = await fetch('https://atc-v4nf.onrender.com/api/comments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
